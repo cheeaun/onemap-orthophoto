@@ -198,6 +198,14 @@
         controlsPanel.classList.toggle('visible');
       });
 
+      document.addEventListener('click', (e) => {
+        if (controlsPanel.classList.contains('visible') && 
+            !controlsPanel.contains(e.target) && 
+            !toggleBtn.contains(e.target)) {
+          controlsPanel.classList.remove('visible');
+        }
+      });
+
       const isRetina = window.devicePixelRatio >= 1.5;
 
       if (root) {
