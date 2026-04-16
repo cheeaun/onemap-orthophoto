@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satellite Enhancer</title>
+    <link href="https://unpkg.com/maplibre-gl@5.23.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+      html, body, #root {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .toggle-btn {
+        position: absolute;
+        bottom: 40px;
+        left: 20px;
+        background: rgba(15, 23, 42, 0.3);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+
+      .toggle-btn:hover {
+        background: rgba(15, 23, 42, 0.5);
+      }
+
+      .controls-panel {
+        position: absolute;
+        bottom: 90px;
+        left: 20px;
+        background: rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        width: 260px;
+        max-width: calc(100vw - 40px);
+        box-sizing: border-box;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        z-index: 10;
+        border: 1px solid rgba(255,255,255,0.2);
+        display: none;
+      }
+
+      .controls-panel.visible {
+        display: block;
+      }
+
+      .controls-panel h3 {
+        margin: 0 0 20px 0;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .control-group {
+        margin-bottom: 16px;
+      }
+
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+
+      .control-group label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 8px;
+        color: #cbd5e1;
+      }
+
+      .control-group input[type="range"] {
+        width: 100%;
+        accent-color: #3b82f6;
+        cursor: pointer;
+      }
+
+      .map-heading {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(15, 23, 42, 0.3);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 20;
+        font-size: 24px;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.2);
+        margin: 0;
+        max-width: calc(100vw - 40px);
+        box-sizing: border-box;
+        pointer-events: none;
+      }
+
+      .panel-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .panel-buttons button {
+        flex: 1;
+        padding: 8px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: background 0.2s, opacity 0.2s;
+      }
+
+      .panel-buttons button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: #3b82f6;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #2563eb;
+      }
+
+      .btn-secondary {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255,255,255,0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <h1 class="map-heading">OneMap Orthophoto</h1>
+    <button id="toggle-btn" class="toggle-btn" aria-label="Enhancements">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+    </button>
+    <div id="controls-panel" class="controls-panel">
+      <div class="control-group">
+        <label><span>Noise Reduction</span> <span id="val-noise">0.00</span></label>
+        <input type="range" id="slider-noise" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="control-group">
+        <label><span>Sharpening</span> <span id="val-sharpen">0.00</span></label>
+        <input type="range" id="slider-sharpen" min="0" max="5" step="0.01" value="0">
+      </div>
+      <div class="control-group">
+        <label><span>Brightening</span> <span id="val-brighten">0.00</span></label>
+        <input type="range" id="slider-brighten" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="control-group">
+        <label><span>Contrast</span> <span id="val-contrast">0.00</span></label>
+        <input type="range" id="slider-contrast" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="control-group">
+        <label><span>Saturation</span> <span id="val-saturation">0.00</span></label>
+        <input type="range" id="slider-saturation" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="panel-buttons">
+        <button id="btn-best-effort" class="btn-primary">Best Effort</button>
+        <button id="btn-reset" class="btn-secondary">Reset</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import maplibregl from 'maplibre-gl';
+
+      const root = document.getElementById('root');
+      const toggleBtn = document.getElementById('toggle-btn');
+      const controlsPanel = document.getElementById('controls-panel');
+
+      toggleBtn.addEventListener('click', () => {
+        controlsPanel.classList.toggle('visible');
+      });
+
+      const isRetina = window.devicePixelRatio >= 1.5;
+
+      if (root) {
+        const map = window._MAP_ = new maplibregl.Map({
+          container: root,
+          center: [103.8521, 1.2847],
+          zoom: 14,
+          minZoom: 10,
+          maxZoom: isRetina ? 18.4 : 19.4,
+          hash: true,
+          style: {
+            version: 8,
+            sources: {
+              'onemap-ortho': {
+                type: 'raster',
+                tiles: [
+                  'https://www.onemap.gov.sg/maps/tiles/Satellite/{z}/{x}/{y}.png'
+                ],
+                tileSize: isRetina ? 128 : 256,
+                bounds: [103.5, 1.1, 104.1, 1.5],
+                attribution: 'Map data &copy; <a href="https://www.onemap.gov.sg/" target="_blank">OneMap</a> | <a href="https://www.sla.gov.sg/" target="_blank">Singapore Land Authority</a>'
+              }
+            },
+            layers: [
+              {
+                id: 'background',
+                type: 'background',
+                paint: {
+                  'background-color': '#0f172a'
+                }
+              },
+              {
+                id: 'onemap-ortho-layer',
+                type: 'raster',
+                source: 'onemap-ortho',
+                paint: {}
+              }
+            ]
+          },
+        });
+
+        map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+        map.on('load', () => {
+          const defaultParams = {
+            noise: 0.0,
+            sharpen: 0.0,
+            brighten: 0.0,
+            contrast: 0.0,
+            saturation: 0.0
+          };
+
+          let params = { ...defaultParams };
+          try {
+            const saved = localStorage.getItem('onemap-enhancements');
+            if (saved) {
+              params = { ...params, ...JSON.parse(saved) };
+            }
+          } catch (e) {
+            console.error('Failed to load enhancements from localStorage', e);
+          }
+
+          const saveParams = () => {
+            localStorage.setItem('onemap-enhancements', JSON.stringify(params));
+          };
+
+          const updateVisibility = () => {
+            if (map.getLayer('webgl-enhancer')) {
+              const isZero = params.noise === 0 && params.sharpen === 0 && params.brighten === 0 && params.contrast === 0 && params.saturation === 0;
+              map.setLayoutProperty('webgl-enhancer', 'visibility', isZero ? 'none' : 'visible');
+            }
+          };
+
+          const updateButtons = () => {
+            const btnBestEffort = document.getElementById('btn-best-effort');
+            const btnReset = document.getElementById('btn-reset');
+            
+            const isZero = params.noise === 0 && params.sharpen === 0 && params.brighten === 0 && params.contrast === 0 && params.saturation === 0;
+            const isBestEffort = params.noise === 0.25 && params.sharpen === 2.50 && params.brighten === 0.10 && params.contrast === 0.80 && params.saturation === 0.30;
+            
+            if (btnReset) btnReset.disabled = isZero;
+            if (btnBestEffort) btnBestEffort.disabled = isBestEffort;
+          };
+
+          const updateParam = (key, id, valId) => {
+            document.getElementById(id)?.addEventListener('input', (e) => {
+              const val = parseFloat(e.target.value);
+              params[key] = val;
+              const valEl = document.getElementById(valId);
+              if (valEl) valEl.textContent = val.toFixed(2);
+              saveParams();
+              updateVisibility();
+              updateButtons();
+              map.triggerRepaint();
+            });
+          };
+
+          updateParam('noise', 'slider-noise', 'val-noise');
+          updateParam('sharpen', 'slider-sharpen', 'val-sharpen');
+          updateParam('brighten', 'slider-brighten', 'val-brighten');
+          updateParam('contrast', 'slider-contrast', 'val-contrast');
+          updateParam('saturation', 'slider-saturation', 'val-saturation');
+
+          const setParams = (newParams, save = true) => {
+            Object.keys(newParams).forEach(key => {
+              params[key] = newParams[key];
+              const slider = document.getElementById(`slider-${key}`);
+              const valEl = document.getElementById(`val-${key}`);
+              if (slider) slider.value = newParams[key];
+              if (valEl) valEl.textContent = newParams[key].toFixed(2);
+            });
+            if (save) saveParams();
+            updateVisibility();
+            updateButtons();
+            map.triggerRepaint();
+          };
+
+          // Initialize UI with loaded params
+          setParams(params, false);
+
+          document.getElementById('btn-best-effort')?.addEventListener('click', () => {
+            setParams({
+              noise: 0.25,
+              sharpen: 2.50,
+              brighten: 0.10,
+              contrast: 0.80,
+              saturation: 0.30
+            });
+          });
+
+          document.getElementById('btn-reset')?.addEventListener('click', () => {
+            localStorage.removeItem('onemap-enhancements');
+            setParams(defaultParams, false);
+          });
+
+          const postProcessLayer = {
+            id: 'webgl-enhancer',
+            type: 'custom',
+            renderingMode: '2d',
+            onAdd: function (map, gl) {
+              const vertexSource = `
+                attribute vec2 a_pos;
+                varying vec2 v_uv;
+                void main() {
+                  v_uv = a_pos * 0.5 + 0.5;
+                  gl_Position = vec4(a_pos, 0.0, 1.0);
+                }
+              `;
+              
+              const fragmentSource = `
+                precision mediump float;
+                varying vec2 v_uv;
+                uniform sampler2D u_texture;
+                uniform vec2 u_resolution;
+                
+                uniform float u_noise_reduction;
+                uniform float u_sharpening;
+                uniform float u_brightening;
+                uniform float u_contrast;
+                uniform float u_saturation;
+                
+                void main() {
+                  vec2 texel = 1.0 / u_resolution;
+                  
+                  float spread = 1.0 + u_noise_reduction * 3.0;
+                  vec2 tx = vec2(texel.x * spread, 0.0);
+                  vec2 ty = vec2(0.0, texel.y * spread);
+                  
+                  vec3 tl = texture2D(u_texture, v_uv - tx - ty).rgb;
+                  vec3 tc = texture2D(u_texture, v_uv - ty).rgb;
+                  vec3 tr = texture2D(u_texture, v_uv + tx - ty).rgb;
+                  vec3 ml = texture2D(u_texture, v_uv - tx).rgb;
+                  vec3 mc = texture2D(u_texture, v_uv).rgb;
+                  vec3 mr = texture2D(u_texture, v_uv + tx).rgb;
+                  vec3 bl = texture2D(u_texture, v_uv - tx + ty).rgb;
+                  vec3 bc = texture2D(u_texture, v_uv + ty).rgb;
+                  vec3 br = texture2D(u_texture, v_uv + tx + ty).rgb;
+                  
+                  vec3 blurred = (tl + tr + bl + br + 2.0*(tc + ml + mr + bc) + 4.0*mc) / 16.0;
+                  
+                  vec3 edges = mc - blurred;
+                  float edgeIntensity = length(edges);
+                  
+                  float edgeMask = smoothstep(0.01, 0.05, edgeIntensity);
+                  
+                  vec3 color = mix(mc, mix(blurred, mc, edgeMask), u_noise_reduction);
+                  
+                  color += edges * edgeMask * u_sharpening;
+                  
+                  color = clamp(color, 0.0, 1.0);
+                  
+                  color = color + color * (1.0 - color) * u_brightening * 2.5;
+                  color = clamp(color, 0.0, 1.0);
+                  
+                  vec3 contrastColor = color * color * (3.0 - 2.0 * color);
+                  color = mix(color, contrastColor, u_contrast);
+                  
+                  float lum = dot(color, vec3(0.299, 0.587, 0.114));
+                  float sat = mix(1.0, 3.0, u_saturation);
+                  color = mix(vec3(lum), color, sat);
+                  
+                  gl_FragColor = vec4(color, 1.0);
+                }
+              `;
+              
+              const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+              gl.shaderSource(vertexShader, vertexSource);
+              gl.compileShader(vertexShader);
+              
+              const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+              gl.shaderSource(fragmentShader, fragmentSource);
+              gl.compileShader(fragmentShader);
+              
+              this.program = gl.createProgram();
+              gl.attachShader(this.program, vertexShader);
+              gl.attachShader(this.program, fragmentShader);
+              gl.linkProgram(this.program);
+              
+              this.aPos = gl.getAttribLocation(this.program, 'a_pos');
+              
+              this.buffer = gl.createBuffer();
+              gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+              gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+                -1.0, -1.0,
+                 1.0, -1.0,
+                -1.0,  1.0,
+                -1.0,  1.0,
+                 1.0, -1.0,
+                 1.0,  1.0
+              ]), gl.STATIC_DRAW);
+
+              this.texture = gl.createTexture();
+              gl.bindTexture(gl.TEXTURE_2D, this.texture);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            },
+            render: function (gl, matrix) {
+              if (!this.program || !this.buffer || this.aPos === undefined || !this.texture) return;
+              
+              const width = gl.drawingBufferWidth;
+              const height = gl.drawingBufferHeight;
+
+              gl.bindTexture(gl.TEXTURE_2D, this.texture);
+              gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, width, height, 0);
+              
+              gl.useProgram(this.program);
+              
+              const resLocation = gl.getUniformLocation(this.program, 'u_resolution');
+              gl.uniform2f(resLocation, width, height);
+              
+              gl.uniform1f(gl.getUniformLocation(this.program, 'u_noise_reduction'), params.noise);
+              gl.uniform1f(gl.getUniformLocation(this.program, 'u_sharpening'), params.sharpen);
+              gl.uniform1f(gl.getUniformLocation(this.program, 'u_brightening'), params.brighten);
+              gl.uniform1f(gl.getUniformLocation(this.program, 'u_contrast'), params.contrast);
+              gl.uniform1f(gl.getUniformLocation(this.program, 'u_saturation'), params.saturation);
+              
+              const texLocation = gl.getUniformLocation(this.program, 'u_texture');
+              gl.uniform1i(texLocation, 0);
+              gl.activeTexture(gl.TEXTURE0);
+              gl.bindTexture(gl.TEXTURE_2D, this.texture);
+              
+              gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+              gl.enableVertexAttribArray(this.aPos);
+              gl.vertexAttribPointer(this.aPos, 2, gl.FLOAT, false, 0, 0);
+              
+              gl.disable(gl.BLEND);
+              gl.drawArrays(gl.TRIANGLES, 0, 6);
+            }
+          };
+
+          map.addLayer(postProcessLayer);
+          updateVisibility();
+        });
+      }
+    </script>
+  </body>
+</html>
+

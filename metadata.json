@@ -1,0 +1,6 @@
+{
+  "name": "OneMap Orthophoto",
+  "description": "A map of Singapore using MapLibre GL JS and OneMap Orthophoto tiles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
