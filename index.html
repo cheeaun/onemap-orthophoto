@@ -15,17 +15,22 @@
         font-family: system-ui, -apple-system, sans-serif;
       }
 
-      .toggle-btn {
+      .map-controls {
         position: absolute;
         bottom: 40px;
         left: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+      }
+
+      .icon-btn {
         background: rgba(15, 23, 42, 0.3);
         color: white;
         border: 1px solid rgba(255,255,255,0.2);
         padding: 10px;
         border-radius: 8px;
         cursor: pointer;
-        z-index: 20;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         box-shadow: 0 4px 6px rgba(0,0,0,0.3);
@@ -35,7 +40,7 @@
         transition: background 0.2s;
       }
 
-      .toggle-btn:hover {
+      .icon-btn:hover {
         background: rgba(15, 23, 42, 0.5);
       }
 
@@ -177,9 +182,14 @@
   <body>
     <div id="root"></div>
     <h1 class="map-heading">OneMap Orthophoto</h1>
-    <button id="toggle-btn" class="toggle-btn" aria-label="Enhancements">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-    </button>
+    <div class="map-controls">
+      <button id="toggle-btn" class="icon-btn" aria-label="Enhancements">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+      </button>
+      <button id="download-btn" class="icon-btn" aria-label="Save Screenshot">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+    </div>
     <div id="controls-panel" class="controls-panel">
       <div class="control-group">
         <label><span>Noise Reduction</span> <span id="val-noise">0.00</span></label>
@@ -216,6 +226,7 @@
 
       const root = document.getElementById('root');
       const toggleBtn = document.getElementById('toggle-btn');
+      const downloadBtn = document.getElementById('download-btn');
       const controlsPanel = document.getElementById('controls-panel');
 
       toggleBtn.addEventListener('click', () => {
@@ -240,6 +251,7 @@
           minZoom: 10,
           maxZoom: isRetina ? 18.4 : 19.4,
           hash: true,
+          canvasContextAttributes: { preserveDrawingBuffer: true },
           style: {
             version: 8,
             sources: {
@@ -349,6 +361,24 @@
 
           // Initialize UI with loaded params
           setParams(params, false);
+
+          downloadBtn.addEventListener('click', () => {
+            const canvas = map.getCanvas();
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            const a = document.createElement('a');
+            a.href = dataURL;
+            const center = map.getCenter();
+            
+            let settingsStr = '';
+            if (params.noise > 0) settingsStr += `-n${params.noise.toFixed(2)}`;
+            if (params.sharpen > 0) settingsStr += `-sh${params.sharpen.toFixed(2)}`;
+            if (params.brighten > 0) settingsStr += `-b${params.brighten.toFixed(2)}`;
+            if (params.contrast > 0) settingsStr += `-c${params.contrast.toFixed(2)}`;
+            if (params.saturation > 0) settingsStr += `-sa${params.saturation.toFixed(2)}`;
+            
+            a.download = `onemap-ortho-${map.getZoom().toFixed(2)}z-${center.lng.toFixed(4)}_${center.lat.toFixed(4)}${settingsStr}.jpg`;
+            a.click();
+          });
 
           document.getElementById('btn-best-effort')?.addEventListener('click', () => {
             setParams({
