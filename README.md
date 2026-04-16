@@ -1,20 +1,63 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# OneMap Orthophoto
 
-# Run and deploy your AI Studio app
+A web application that renders Singapore's OneMap Orthophoto (satellite) tiles using [MapLibre GL JS](https://maplibre.org/), featuring a custom WebGL post-processing layer for real-time image enhancement.
 
-This contains everything you need to run your app locally.
+## ✨ Features
 
-View your app in AI Studio: https://ai.studio/apps/05b06908-3397-41ae-8800-7c18b9574317
+* **Singapore Satellite Imagery:** Integrates directly with OneMap's Orthophoto tile service.
+* **Real-time WebGL Enhancements:** Adjust the visual quality of the satellite imagery on the fly using custom WebGL shaders:
+  * Noise Reduction
+  * Sharpening
+  * Brightening
+  * Contrast
+  * Saturation
+* **Smart Presets & Persistence:** Includes a "Best Effort" preset for quick optimization. Your custom settings are automatically saved to `localStorage` and restored on your next visit.
+* **Retina/HiDPI Support:** Automatically detects high-density displays and adjusts tile sizes and zoom levels for the crispest possible imagery.
+* **Performance Optimized:** The WebGL post-processing layer automatically disables itself when all settings are at their default (zero) to save GPU cycles.
 
-## Run Locally
+## 🛠️ Tech Stack
 
-**Prerequisites:**  Node.js
+* **MapLibre GL JS** - Open-source interactive map library.
+* **WebGL** - Custom fragment shaders for real-time image manipulation.
+* **Vite 8** - Next-generation frontend tooling for fast builds and development.
 
+## 🚀 Getting Started
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prerequisites
+
+* Node.js (v18 or higher recommended)
+* npm
+
+### Installation
+
+1. Clone the repository and navigate to the project directory.
+2. Install the dependencies:
+
+```bash
+npm install
+```
+
+### Development
+
+Start the Vite development server:
+
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:3000`.
+
+### Production Build
+
+Build the application for production:
+
+```bash
+npm run build
+```
+
+The optimized static files will be generated in the `dist` directory, ready to be served by any static file server.
+
+## 🙏 Acknowledgments
+
+* Map data &copy; [OneMap](https://www.onemap.gov.sg/)
+* Map data &copy; [Singapore Land Authority (SLA)](https://www.sla.gov.sg/)
