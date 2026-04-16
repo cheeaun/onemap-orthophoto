@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Satellite Enhancer</title>
-    <link href="https://unpkg.com/maplibre-gl@5.23.0/dist/maplibre-gl.css" rel="stylesheet" />
     <style>
       html, body, #root {
         margin: 0;
@@ -13,6 +12,7 @@
         height: 100%;
         overflow: hidden;
         font-family: system-ui, -apple-system, sans-serif;
+        background-color: #000;
       }
 
       .map-controls {
@@ -217,12 +217,14 @@
       </div>
       <div class="panel-footer">
         Generated via <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a>.<br>
-        <a href="https://ais-pre-gicrjv347zg5b6pb5gcsu2-202745490252.asia-southeast1.run.app" target="_blank">Remix this app</a>
+        <a href="https://ais-pre-gicrjv347zg5b6pb5gcsu2-202745490252.asia-southeast1.run.app" target="_blank">Remix this app</a> &bull;
+        <a href="https://github.com/cheeaun/onemap-orthophoto" target="_blank">GitHub</a>
       </div>
     </div>
 
     <script type="module">
       import maplibregl from 'maplibre-gl';
+      import 'maplibre-gl/dist/maplibre-gl.css';
 
       const root = document.getElementById('root');
       const toggleBtn = document.getElementById('toggle-btn');
@@ -270,7 +272,7 @@
                 id: 'background',
                 type: 'background',
                 paint: {
-                  'background-color': '#0f172a'
+                  'background-color': '#000000'
                 }
               },
               {
