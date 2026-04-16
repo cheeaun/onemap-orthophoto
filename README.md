@@ -57,6 +57,12 @@ npm run build
 
 The optimized static files will be generated in the `dist` directory, ready to be served by any static file server.
 
+## 🤖 Built with Google AI Studio
+
+This project was generated using [Google AI Studio Build](https://aistudio.google.com/). 
+
+You can view and remix the original applet here: **[Remix on AI Studio](https://ais-pre-gicrjv347zg5b6pb5gcsu2-202745490252.asia-southeast1.run.app)**
+
 ## 🙏 Acknowledgments
 
 * Map data &copy; [OneMap](https://www.onemap.gov.sg/)
