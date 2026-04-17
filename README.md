@@ -1,6 +1,6 @@
 # OneMap Orthophoto
 
-![OneMap Orthophoto - Mobile Landscape](screenshot.jpg)
+![Screenshot of OneMap Orthophoto](https://imgur.com/4BBAjOn)
 
 A web application that renders Singapore's OneMap Orthophoto (satellite) tiles using [MapLibre GL JS](https://maplibre.org/), featuring a custom WebGL post-processing layer for real-time image enhancement.
 
