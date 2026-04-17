@@ -1,6 +1,14 @@
 # OneMap Orthophoto
 
-![Screenshot of OneMap Orthophoto](https://i.imgur.com/4BBAjOn.jpeg)
+[![Screenshot of OneMap Orthophoto](https://i.imgur.com/4BBAjOn.jpeg)](https://cheeaun.github.io/onemap-orthophoto/)
+
+<div align="center">
+
+### 🚀 [Try the Live Demo](https://cheeaun.github.io/onemap-orthophoto/)
+
+[![Live Demo](https://img.shields.io/badge/LIVE_DEMO-Visit_Website-blue?style=for-the-badge&logo=google-chrome&logoColor=white)](https://cheeaun.github.io/onemap-orthophoto/)
+
+</div>
 
 A web application that renders Singapore's OneMap Orthophoto (satellite) tiles using [MapLibre GL JS](https://maplibre.org/), featuring a custom WebGL post-processing layer for real-time image enhancement.
 
