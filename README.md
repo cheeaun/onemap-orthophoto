@@ -25,6 +25,10 @@ A web application that renders Singapore's OneMap Orthophoto (satellite) tiles u
 * **Retina/HiDPI Support:** Automatically detects high-density displays and adjusts tile sizes and zoom levels for the crispest possible imagery.
 * **Performance Optimized:** The WebGL post-processing layer automatically disables itself when all settings are at their default (zero) to save GPU cycles.
 
+## 💡 Technical Note: The "Retina Hack"
+
+OneMap natively serves 256px tiles, which appear blurry on Retina displays when stretched across 512 physical pixels. By explicitly halving MapLibre's `tileSize` to 128px on HiDPI screens, we squeeze the 256px images into a perfect 1:1 hardware pixel mapping for incredibly crisp satellite imagery.
+
 ## 🛠️ Tech Stack
 
 * **MapLibre GL JS** - Open-source interactive map library.

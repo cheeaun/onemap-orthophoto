@@ -243,6 +243,7 @@
         }
       });
 
+      // Retina hack: Force 128px tile size on HiDPI displays to organically squeeze OneMap's 256px tiles into a perfect 1:1 physical pixel mapping without upscale blur.
       const isRetina = window.devicePixelRatio >= 1.5;
 
       if (root) {
@@ -251,6 +252,7 @@
           center: [103.8521, 1.2847],
           zoom: 14,
           minZoom: 10,
+          // Adjust maxZoom based on retina status because of the tile size hack
           maxZoom: isRetina ? 18.4 : 19.4,
           hash: true,
           canvasContextAttributes: { preserveDrawingBuffer: true },
@@ -262,6 +264,8 @@
                 tiles: [
                   'https://www.onemap.gov.sg/maps/tiles/Satellite/{z}/{x}/{y}.png'
                 ],
+                // Forcing 128 tileSize translates MapLibre's zoom levels differently,
+                // effectively doubling the resolution (retina-spec) for a 256px tile.
                 tileSize: isRetina ? 128 : 256,
                 bounds: [103.5, 1.1, 104.1, 1.5],
                 attribution: 'Map data &copy; <a href="https://www.onemap.gov.sg/" target="_blank">OneMap</a> | <a href="https://www.sla.gov.sg/" target="_blank">Singapore Land Authority</a>'
